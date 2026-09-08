@@ -221,7 +221,9 @@
 
     async function cargarExcelAutomatico() {
         try {
-            const response = await fetch('datos.xlsx');
+            // AQUI ESTA LA INSTRUCCION ANTI-CACHE
+            const response = await fetch('datos.xlsx', { cache: 'no-store' });
+            
             if (!response.ok) throw new Error("No se encontró el archivo");
             
             // Lógica para obtener la fecha de actualización real o la actual
