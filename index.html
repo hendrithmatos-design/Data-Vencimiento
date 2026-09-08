@@ -4,40 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wynco | Inteligencia Operativa Logística - Vencimientos</title>
+    <!-- Librerías CDN -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
-        :root { --wynco-red: #8B0000; --wynco-dark: #333333; --wynco-light-bg: #F8F9FA; --wynco-border: #D1D5DB; }
+        :root {
+            --wynco-red: #8B0000;
+            --wynco-red-hover: #6B0000;
+            --wynco-dark: #333333;
+            --wynco-gray: #4D4D4D;
+            --wynco-light-bg: #F8F9FA;
+            --wynco-border: #D1D5DB;
+        }
+
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; padding: 15px; color: #1e293b; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .header-title { background-color: var(--wynco-red); color: white; padding: 12px 20px; border-radius: 6px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .update-badge { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
+        .header-title {
+            background-color: var(--wynco-red);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .update-badge { background: rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: normal; }
+
         .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
-        input[type="text"], select { padding: 8px 12px; border: 1px solid var(--wynco-border); border-radius: 6px; font-size: 13px; }
+        input[type="file"], input[type="text"], select { padding: 8px 12px; border: 1px solid var(--wynco-border); border-radius: 6px; font-size: 13px; }
         input[type="text"] { flex-grow: 1; min-width: 180px; }
+        
         button { background-color: var(--wynco-red); color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
+        button:hover { background-color: var(--wynco-red-hover); }
         .btn-dash { background-color: var(--wynco-dark); }
+        .btn-dash:hover { background-color: #1a1a1a; }
+        
         .stats-container { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
         .stat-box { background: var(--wynco-light-bg); border: 1px solid var(--wynco-border); border-top: 4px solid var(--wynco-dark); padding: 10px; border-radius: 6px; text-align: center; flex: 1; min-width: 130px; }
         .stat-number { font-size: 17px; font-weight: bold; margin-top: 2px; }
         .stat-subtext { font-size: 11px; color: #64748b; margin-top: 2px; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; }
         th { background-color: var(--wynco-red); color: white; padding: 10px 8px; text-align: left; position: sticky; top: 0; }
         td { padding: 8px; border-bottom: 1px solid #e2e8f0; }
-        tr.clickable:hover { background-color: #f1f5f9; cursor: pointer; }
+        tr.clickable { cursor: pointer; transition: background-color 0.2s; }
+        tr.clickable:hover { background-color: #f1f5f9; }
+
         .badge { font-weight: bold; padding: 4px 8px; border-radius: 12px; display: inline-block; font-size: 11px; }
         .rojo { background-color: #fee2e2; color: #8B0000; border: 1px solid #fecaca; }
         .amarillo { background-color: #fef9c3; color: #ca8a04; border: 1px solid #fef08a; }
         .verde { background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
-        .chart-card { background: #ffffff; border: 1px solid var(--wynco-border); border-top: 3px solid var(--wynco-red); padding: 15px; border-radius: 8px; height: 280px; }
+        .chart-card { background: #ffffff; border: 1px solid var(--wynco-border); border-top: 3px solid var(--wynco-red); padding: 15px; border-radius: 8px; height: 280px; position: relative; }
         .chart-container { position: relative; height: 220px; width: 100%; }
-        /* Clases del Modal resumidas */
+
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 550px; position: relative; }
-        .close-btn { position: absolute; top: 12px; right: 18px; font-size: 20px; cursor: pointer; }
+        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 550px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; }
+        .close-btn { position: absolute; top: 12px; right: 18px; font-size: 20px; cursor: pointer; color: #64748b; font-weight: bold; }
         .sim-box { background: var(--wynco-light-bg); border: 1px solid var(--wynco-border); padding: 12px; border-radius: 8px; margin-top: 12px; }
         .sim-input { width: 75px; padding: 5px; font-weight: bold; text-align: center; font-size: 14px; }
     </style>
@@ -47,7 +78,7 @@
 <div class="card">
     <div class="header-title">
         <span>Wynco | Inteligencia Operativa Logística - Vencimientos FEFO</span>
-        <span id="fechaActualizacion" class="update-badge">Buscando datos en la nube...</span>
+        <span id="fechaActualizacion" class="update-badge">Cargando datos desde la nube...</span>
     </div>
     
     <div class="controls">
@@ -62,6 +93,7 @@
         <button id="exportBtn" style="display:none;">📥 Exportar a Excel con Colores</button>
     </div>
 
+    <!-- Indicadores Estadísticos -->
     <div id="stats" class="stats-container" style="display:none;">
         <div class="stat-box">
             <div style="font-weight:600; color: var(--wynco-dark);">Stock Total</div>
@@ -80,17 +112,25 @@
         </div>
     </div>
 
-    <div id="vistaTabla"><div id="resultado"></div></div>
+    <!-- VISTA 1: TABLA -->
+    <div id="vistaTabla">
+        <div id="resultado"></div>
+    </div>
 
+    <!-- VISTA 2: DASHBOARD CEO -->
     <div id="vistaDashboard" style="display:none;">
         <div class="dashboard-grid">
             <div class="chart-card">
-                <h4 style="margin: 0 0 10px 0; font-size: 14px;">PROPORCIÓN DE INVENTARIO EN RIESGO (%)</h4>
-                <div class="chart-container"><canvas id="chartPieRiesgo"></canvas></div>
+                <h4 style="margin: 0 0 10px 0; color: var(--wynco-dark); font-size: 14px;">PROPORCIÓN DE INVENTARIO EN RIESGO (%)</h4>
+                <div class="chart-container">
+                    <canvas id="chartPieRiesgo"></canvas>
+                </div>
             </div>
             <div class="chart-card">
-                <h4 style="margin: 0 0 10px 0; font-size: 14px;">DISTRIBUCIÓN DE RIESGO POR CATEGORÍA</h4>
-                <div class="chart-container"><canvas id="chartBarCategorias"></canvas></div>
+                <h4 style="margin: 0 0 10px 0; color: var(--wynco-dark); font-size: 14px;">DISTRIBUCIÓN DE RIESGO POR CATEGORÍA (%)</h4>
+                <div class="chart-container">
+                    <canvas id="chartBarCategorias"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -102,14 +142,16 @@
         <span class="close-btn" onclick="cerrarModal()">&times;</span>
         <h3 id="modalTitulo" style="margin-top: 0; color: var(--wynco-red);"></h3>
         <p id="modalSubtitulo" style="color: #64748b; font-size: 12px;"></p>
+        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
             <div><b>Stock Actual:</b> <span id="mStock"></span> cajas</div>
             <div><b>Venta Promedio (6M):</b> <span id="mPromedio"></span> cajas/mes</div>
             <div><b>Meses para Vencer:</b> <span id="mMeses"></span> meses</div>
             <div><b>Venta Proyectada:</b> <span id="mVentaProy"></span> cajas</div>
         </div>
+
         <div class="sim-box">
-            <h4 style="margin-top:0; font-size: 13px;">🚀 Simulador de Impulso de Ventas</h4>
+            <h4 style="margin-top:0; color: var(--wynco-dark); font-size: 13px;">🚀 Simulador de Impulso de Ventas</h4>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <label style="font-size: 12px;"><b>Incremento Venta (%):</b></label>
                 <input type="number" id="inputImpulso" class="sim-input" value="0" min="0" max="500" />
@@ -127,26 +169,37 @@
 
 <script>
     Chart.register(ChartDataLabels);
+
     let datosProcesados = [];
     let skuSeleccionado = null;
     let chartPieInstance = null;
     let chartBarInstance = null;
     let enDashboard = false;
 
+    // PARSER ROBUSTO DE FECHAS LATINAS
     function parseExcelDateRobusto(excelDate) {
         if (!excelDate) return null;
         if (excelDate instanceof Date) return isNaN(excelDate.getTime()) ? null : excelDate;
-        if (typeof excelDate === 'number') return new Date(Math.round((excelDate - 25569) * 86400 * 1000));
+        
+        if (typeof excelDate === 'number') {
+            return new Date(Math.round((excelDate - 25569) * 86400 * 1000));
+        }
+        
         if (typeof excelDate === 'string') {
             const str = excelDate.trim();
             if (str.includes('/') || str.includes('-')) {
                 const sep = str.includes('/') ? '/' : '-';
                 const partes = str.split(sep);
                 if (partes.length === 3) {
-                    if (partes[0].length === 4) return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
-                    const dia = parseInt(partes[0], 10), mes = parseInt(partes[1], 10) - 1, ano = parseInt(partes[2], 10);
-                    const fecha = new Date(ano, mes, dia);
-                    if (!isNaN(fecha.getTime())) return fecha;
+                    if (partes[0].length === 4) {
+                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                    } else {
+                        const dia = parseInt(partes[0], 10);
+                        const mes = parseInt(partes[1], 10) - 1;
+                        const ano = parseInt(partes[2], 10);
+                        const fecha = new Date(ano, mes, dia);
+                        if (!isNaN(fecha.getTime())) return fecha;
+                    }
                 }
             }
             const parsed = new Date(str);
@@ -155,30 +208,55 @@
         return null;
     }
 
-    window.addEventListener('DOMContentLoaded', cargarExcelAutomatico);
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const esModoCEO = urlParams.get('modo') === 'gerencia' || urlParams.get('modo') === 'ceo';
+
+        if (esModoCEO) {
+            enDashboard = false;
+        }
+
+        cargarExcelAutomatico();
+    });
 
     async function cargarExcelAutomatico() {
         try {
             const response = await fetch('datos.xlsx');
-            if (!response.ok) throw new Error("No se encontró datos.xlsx");
+            if (!response.ok) throw new Error("No se encontró el archivo");
             
+            // Lógica para obtener la fecha de actualización real o la actual
+            let textoFecha = "";
+            const lastModified = response.headers.get('Last-Modified');
+            if (lastModified) {
+                const fechaModificacion = new Date(lastModified);
+                textoFecha = fechaModificacion.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } else {
+                textoFecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            }
+            document.getElementById('fechaActualizacion').innerText = `📅 Actualizado: ${textoFecha}`;
+
             const arrayBuffer = await response.arrayBuffer();
-            const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true, cellNF: false, cellText: false });
+            const data = new Uint8Array(arrayBuffer);
+            
+            const workbook = XLSX.read(data, { type: 'array', cellDates: true, cellNF: false, cellText: false });
 
             const sheetVenc = workbook.Sheets['Vencimiento'];
             const sheetVentas = workbook.Sheets['Venta 6 meses'];
 
-            if (!sheetVenc || !sheetVentas) throw new Error("Faltan pestañas");
-
-            const fechaHoy = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            document.getElementById('fechaActualizacion').innerText = `📅 Datos en vivo (Act. Automática)`;
+            if (!sheetVenc || !sheetVentas) {
+                alert("Error: El archivo debe contener las pestañas 'Vencimiento' y 'Venta 6 meses'.");
+                return;
+            }
 
             const rowsVentas = XLSX.utils.sheet_to_json(sheetVentas, { raw: true });
             const ventasPorSKU = {};
+
             rowsVentas.forEach(r => {
                 const sku = String(r['S.K.U'] || r['SKU'] || '').trim();
                 const cajas = parseFloat(r['Total Cajas Vendidas'] || 0);
-                if (sku) ventasPorSKU[sku] = (ventasPorSKU[sku] || 0) + cajas;
+                if (sku) {
+                    ventasPorSKU[sku] = (ventasPorSKU[sku] || 0) + cajas;
+                }
             });
 
             const rowsVenc = XLSX.utils.sheet_to_json(sheetVenc, { raw: true });
@@ -190,39 +268,68 @@
                 const cod = String(r['Número de artículo'] || r['Numero de articulo'] || '').trim();
                 const desc = r['Descripción del artículo'] || r['Descripcion del articulo'] || '';
                 const cant = parseFloat(r['Cantidad'] || 0);
-                const fechaObj = parseExcelDateRobusto(r['Fecha de vencimiento']);
-                
+                const fechaRaw = r['Fecha de vencimiento'];
+
+                const fechaObj = parseExcelDateRobusto(fechaRaw);
                 if (!fechaObj) return;
+
                 const mesAno = `${fechaObj.getFullYear()}-${String(fechaObj.getMonth() + 1).padStart(2, '0')}`;
                 const key = `${cat}|${cod}|${desc}|${mesAno}`;
 
                 if (!grupos[key]) {
-                    grupos[key] = { cat, cod, desc, mesAno, primerFecha: fechaObj, totalCant: cant };
+                    grupos[key] = {
+                        cat, cod, desc, mesAno,
+                        primerFecha: fechaObj,
+                        fechasSet: new Set([fechaObj.toLocaleDateString('es-ES')]),
+                        totalCant: cant
+                    };
                 } else {
                     grupos[key].totalCant += cant;
                     if (fechaObj < grupos[key].primerFecha) grupos[key].primerFecha = fechaObj;
+                    grupos[key].fechasSet.add(fechaObj.toLocaleDateString('es-ES'));
                 }
             });
 
             datosProcesados = Object.values(grupos).map(g => {
                 const diffDias = (g.primerFecha - hoy) / (1000 * 60 * 60 * 24);
                 const mesesParaVencer = Math.max(0.1, diffDias / 30.0);
-                const promMensual = Math.max(0, (ventasPorSKU[g.cod] || 0) / 6.0);
+                
+                const ventaNeta6M = ventasPorSKU[g.cod] || 0;
+                const promMensual = Math.max(0, ventaNeta6M / 6.0);
+                
                 const ventaProyectada = Math.round(promMensual * mesesParaVencer);
                 const cajasEnRiesgo = Math.max(0, Math.round(g.totalCant - ventaProyectada));
+                
+                let claseRotacion = 'verde', textoRotacion = '🟢 Stock Vendible', codigoRotacion = 'VERDE';
                 const pctRiesgo = (g.totalCant > 0) ? (cajasEnRiesgo / g.totalCant) * 100 : 0;
 
-                let claseRotacion = 'verde', textoRotacion = '🟢 Stock Vendible', codigoRotacion = 'VERDE';
-                if (promMensual === 0 && g.totalCant > 0) { claseRotacion = 'rojo'; textoRotacion = '🔴 Crítico (Sin Venta)'; codigoRotacion = 'ROJO'; }
-                else if (pctRiesgo >= 50) { claseRotacion = 'rojo'; textoRotacion = `🔴 Alto Riesgo (${Math.round(pctRiesgo)}%)`; codigoRotacion = 'ROJO'; }
-                else if (cajasEnRiesgo > 0) { claseRotacion = 'amarillo'; textoRotacion = `🟡 Medio Riesgo (${Math.round(pctRiesgo)}%)`; codigoRotacion = 'AMARILLO'; }
+                if (promMensual === 0 && g.totalCant > 0) {
+                    claseRotacion = 'rojo'; textoRotacion = '🔴 Crítico (Sin Venta 6M)'; codigoRotacion = 'ROJO';
+                } else if (pctRiesgo >= 50) {
+                    claseRotacion = 'rojo'; textoRotacion = `🔴 Alto Riesgo (${Math.round(pctRiesgo)}% Sobrante)`; codigoRotacion = 'ROJO';
+                } else if (cajasEnRiesgo > 0) {
+                    claseRotacion = 'amarillo'; textoRotacion = `🟡 Medio Riesgo (${Math.round(pctRiesgo)}% Sobrante)`; codigoRotacion = 'AMARILLO';
+                }
 
                 let textoFEFO = '🟢 VERDE (> 7 Meses)', codigoFEFO = 'VERDE';
                 if (mesesParaVencer <= 3) { textoFEFO = '🔴 ROJO (1-3 Meses)'; codigoFEFO = 'ROJO'; }
                 else if (mesesParaVencer <= 5) { textoFEFO = '🟡 AMARILLO (4-5 Meses)'; codigoFEFO = 'AMARILLO'; }
                 else if (mesesParaVencer <= 7) { textoFEFO = '🟠 ATENCIÓN (6 Meses)'; codigoFEFO = 'ATENCIÓN'; }
 
-                return { ...g, mesesParaVencer, promMensual, ventaProyectada, cajasEnRiesgo, claseRotacion, textoRotacion, codigoRotacion, textoFEFO, codigoFEFO };
+                return {
+                    ...g,
+                    mesesParaVencer,
+                    ventaNeta6M,
+                    promMensual,
+                    ventaProyectada,
+                    cajasEnRiesgo,
+                    pctRiesgo,
+                    claseRotacion,
+                    textoRotacion,
+                    codigoRotacion,
+                    textoFEFO,
+                    codigoFEFO
+                };
             }).sort((a, b) => b.cajasEnRiesgo - a.cajasEnRiesgo);
 
             document.getElementById('searchInput').disabled = false;
@@ -232,106 +339,290 @@
             document.getElementById('stats').style.display = 'flex';
 
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('modo') === 'gerencia' || urlParams.get('modo') === 'ceo') {
+            const esModoCEO = urlParams.get('modo') === 'gerencia' || urlParams.get('modo') === 'ceo';
+
+            if (esModoCEO) {
+                enDashboard = false;
                 alternarVista();
             } else {
                 actualizarVista();
             }
 
         } catch (error) {
-            document.getElementById('fechaActualizacion').innerText = "⚠️ Error: Archivo datos.xlsx no encontrado en la nube.";
-            console.error(error);
+            console.error("Error al cargar automático:", error);
+            document.getElementById('fechaActualizacion').innerText = "⚠️ Error: No se encontró el archivo datos.xlsx en la nube";
         }
     }
 
     function actualizarVista() {
         const busqueda = document.getElementById('searchInput').value.toLowerCase();
-        const filtro = document.getElementById('filterAlert').value;
-        const filtrados = datosProcesados.filter(i => (i.cod.toLowerCase().includes(busqueda) || i.desc.toLowerCase().includes(busqueda) || i.cat.toLowerCase().includes(busqueda)) && (filtro === 'TODOS' || i.codigoRotacion === filtro));
+        const filtroEstado = document.getElementById('filterAlert').value;
+
+        const filtrados = datosProcesados.filter(item => {
+            const coincideTexto = item.cod.toLowerCase().includes(busqueda) || 
+                                 item.desc.toLowerCase().includes(busqueda) || 
+                                 item.cat.toLowerCase().includes(busqueda);
+            const coincideEstado = (filtroEstado === 'TODOS') || (item.codigoRotacion === filtroEstado);
+            return coincideTexto && coincideEstado;
+        });
 
         const totalStock = filtrados.reduce((a, b) => a + b.totalCant, 0);
         const totalRiesgo = filtrados.reduce((a, b) => a + b.cajasEnRiesgo, 0);
-        
+        const totalSeguro = Math.max(0, totalStock - totalRiesgo);
+
         document.getElementById('statTotalStock').innerText = `${totalStock.toLocaleString()} cajas`;
         document.getElementById('statTotalRegistros').innerText = `${filtrados.length} SKUs`;
+
         document.getElementById('statCajasRiesgo').innerText = `${totalRiesgo.toLocaleString()} cajas`;
         document.getElementById('statSKURiesgo').innerText = `${filtrados.filter(d => d.codigoRotacion === 'ROJO').length} SKUs Críticos`;
-        document.getElementById('statCajasSeguras').innerText = `${Math.max(0, totalStock - totalRiesgo).toLocaleString()} cajas`;
+
+        document.getElementById('statCajasSeguras').innerText = `${totalSeguro.toLocaleString()} cajas`;
         document.getElementById('statSKUSeguros').innerText = `${filtrados.filter(d => d.codigoRotacion === 'VERDE').length} SKUs Seguros`;
 
-        let html = `<table><tr><th>Categoría</th><th>SKU</th><th>Descripción</th><th>Mes Venc.</th><th>1er Venc.</th><th>Stock</th><th>Prom. Venta</th><th>Cajas Riesgo</th><th>Alerta Rotación</th></tr>`;
+        let html = `<table><tr>
+            <th>Categoría</th><th>SKU</th><th>Descripción</th><th>Mes Venc.</th>
+            <th>1er Venc. (FEFO)</th><th>Stock</th><th>Prom. Venta (6M)</th><th>Cajas en Riesgo</th><th>Alerta Rotación</th>
+        </tr>`;
+
         filtrados.forEach(g => {
+            const fechaStr = (g.primerFecha instanceof Date) ? g.primerFecha.toLocaleDateString('es-ES') : g.primerFecha;
             html += `<tr class="clickable" onclick="abrirSimulador('${g.cod}', '${g.mesAno}')">
                 <td>${g.cat}</td><td><b>${g.cod}</b></td><td>${g.desc}</td><td>${g.mesAno}</td>
-                <td>${g.primerFecha.toLocaleDateString('es-ES')}</td><td><b>${g.totalCant.toLocaleString()}</b></td>
-                <td>${g.promMensual.toFixed(1)} /mes</td><td><b style="color:${g.cajasEnRiesgo > 0 ? '#8B0000' : '#16a34a'}">${g.cajasEnRiesgo.toLocaleString()}</b></td>
-                <td><span class="badge ${g.claseRotacion}">${g.textoRotacion}</span></td></tr>`;
+                <td>${fechaStr}</td>
+                <td><b>${g.totalCant.toLocaleString()}</b></td>
+                <td>${g.promMensual.toFixed(1)} /mes</td>
+                <td><b style="color:${g.cajasEnRiesgo > 0 ? '#8B0000' : '#16a34a'}">${g.cajasEnRiesgo.toLocaleString()}</b></td>
+                <td><span class="badge ${g.claseRotacion}">${g.textoRotacion}</span></td>
+            </tr>`;
         });
-        document.getElementById('resultado').innerHTML = html + '</table>';
-        if (enDashboard) renderizarGraficos(filtrados, totalRiesgo, Math.max(0, totalStock - totalRiesgo));
+
+        html += '</table>';
+        document.getElementById('resultado').innerHTML = html;
+
+        if (enDashboard) {
+            renderizarGraficos(filtrados, totalRiesgo, totalSeguro);
+        }
     }
 
     function alternarVista() {
         enDashboard = !enDashboard;
-        document.getElementById('toggleViewBtn').innerText = enDashboard ? "📋 Ver Vista de Tabla" : "📊 Ver Dashboard CEO";
-        document.getElementById('vistaTabla').style.display = enDashboard ? 'none' : 'block';
-        document.getElementById('vistaDashboard').style.display = enDashboard ? 'block' : 'none';
-        if (enDashboard) actualizarVista();
+        const btn = document.getElementById('toggleViewBtn');
+        const vTabla = document.getElementById('vistaTabla');
+        const vDash = document.getElementById('vistaDashboard');
+
+        if (enDashboard) {
+            btn.innerText = "📋 Ver Vista de Tabla";
+            vTabla.style.display = 'none';
+            vDash.style.display = 'block';
+            actualizarVista();
+        } else {
+            btn.innerText = "📊 Ver Dashboard CEO";
+            vDash.style.display = 'none';
+            vTabla.style.display = 'block';
+        }
     }
 
     function renderizarGraficos(filtrados, totalRiesgo, totalSeguro) {
+        const totalGráfico = totalRiesgo + totalSeguro;
+
         const ctxPie = document.getElementById('chartPieRiesgo').getContext('2d');
         if (chartPieInstance) chartPieInstance.destroy();
-        chartPieInstance = new Chart(ctxPie, { type: 'doughnut', data: { labels: ['Riesgo', 'Vendibles'], datasets: [{ data: [totalRiesgo, totalSeguro], backgroundColor: ['#8B0000', '#4D4D4D'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { color: '#fff', font: { weight: 'bold' }, formatter: (v) => totalRiesgo+totalSeguro === 0 ? '0%' : ((v/(totalRiesgo+totalSeguro))*100).toFixed(1)+'%' } } } });
+
+        chartPieInstance = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: ['Cajas en Riesgo', 'Cajas Vendibles'],
+                datasets: [{
+                    data: [totalRiesgo, totalSeguro],
+                    backgroundColor: ['#8B0000', '#4D4D4D']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                    datalabels: {
+                        color: '#ffffff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value) => {
+                            if (totalGráfico === 0) return '0%';
+                            const pct = ((value / totalGráfico) * 100).toFixed(1);
+                            return `${pct}%`;
+                        }
+                    }
+                }
+            }
+        });
 
         const catMap = {};
-        filtrados.forEach(d => { if (d.cajasEnRiesgo > 0) catMap[d.cat] = (catMap[d.cat] || 0) + d.cajasEnRiesgo; });
+        filtrados.forEach(d => {
+            if (d.cajasEnRiesgo > 0) {
+                catMap[d.cat] = (catMap[d.cat] || 0) + d.cajasEnRiesgo;
+            }
+        });
+
+        const labelsCat = Object.keys(catMap);
+        const dataCat = Object.values(catMap);
+
         const ctxBar = document.getElementById('chartBarCategorias').getContext('2d');
         if (chartBarInstance) chartBarInstance.destroy();
-        chartBarInstance = new Chart(ctxBar, { type: 'bar', data: { labels: Object.keys(catMap), datasets: [{ data: Object.values(catMap), backgroundColor: '#8B0000' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#8B0000', formatter: (v) => totalRiesgo === 0 ? '0%' : ((v/totalRiesgo)*100).toFixed(1)+'%' } } } });
+
+        chartBarInstance = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: labelsCat,
+                datasets: [{
+                    label: 'Cajas en Riesgo',
+                    data: dataCat,
+                    backgroundColor: '#8B0000'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 2,
+                        color: '#8B0000',
+                        font: { weight: 'bold', size: 11 },
+                        formatter: (value) => {
+                            if (totalRiesgo === 0) return '0%';
+                            const pct = ((value / totalRiesgo) * 100).toFixed(1);
+                            return `${pct}%`;
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 10 } } },
+                    y: { grace: '15%', ticks: { font: { size: 10 } } }
+                }
+            }
+        });
     }
 
     document.getElementById('searchInput').addEventListener('input', actualizarVista);
     document.getElementById('filterAlert').addEventListener('change', actualizarVista);
 
     function abrirSimulador(cod, mesAno) {
-        skuSeleccionado = datosProcesados.find(d => d.cod === cod && d.mesAno === mesAno);
-        if (!skuSeleccionado) return;
-        document.getElementById('modalTitulo').innerText = `${skuSeleccionado.cod} - ${skuSeleccionado.desc}`;
-        document.getElementById('modalSubtitulo').innerText = `Categoría: ${skuSeleccionado.cat} | Vencimiento: ${skuSeleccionado.primerFecha.toLocaleDateString('es-ES')}`;
-        document.getElementById('mStock').innerText = skuSeleccionado.totalCant.toLocaleString();
-        document.getElementById('mPromedio').innerText = skuSeleccionado.promMensual.toFixed(1);
-        document.getElementById('mMeses').innerText = skuSeleccionado.mesesParaVencer.toFixed(1);
-        document.getElementById('mVentaProy').innerText = skuSeleccionado.ventaProyectada.toLocaleString();
+        const item = datosProcesados.find(d => d.cod === cod && d.mesAno === mesAno);
+        if (!item) return;
+
+        skuSeleccionado = item;
+        const fechaStr = (item.primerFecha instanceof Date) ? item.primerFecha.toLocaleDateString('es-ES') : item.primerFecha;
+
+        document.getElementById('modalTitulo').innerText = `${item.cod} - ${item.desc}`;
+        document.getElementById('modalSubtitulo').innerText = `Categoría: ${item.cat} | Vencimiento: ${fechaStr}`;
+        
+        document.getElementById('mStock').innerText = item.totalCant.toLocaleString();
+        document.getElementById('mPromedio').innerText = item.promMensual.toFixed(1);
+        document.getElementById('mMeses').innerText = item.mesesParaVencer.toFixed(1);
+        document.getElementById('mVentaProy').innerText = item.ventaProyectada.toLocaleString();
+
         document.getElementById('inputImpulso').value = 0;
         recalcularSimulacion();
+
         document.getElementById('modalSimulador').style.display = 'flex';
     }
 
     function recalcularSimulacion() {
         if (!skuSeleccionado) return;
         const pctImpulso = parseFloat(document.getElementById('inputImpulso').value || 0);
+        
         const nuevaVentaProm = skuSeleccionado.promMensual * (1 + (pctImpulso / 100.0));
         const nuevaVentaTotal = Math.round(nuevaVentaProm * skuSeleccionado.mesesParaVencer);
         const nuevoRiesgo = Math.max(0, Math.round(skuSeleccionado.totalCant - nuevaVentaTotal));
+
         document.getElementById('mNuevaVentaProm').innerText = nuevaVentaProm.toFixed(1);
         document.getElementById('mNuevaVentaTotal').innerText = nuevaVentaTotal.toLocaleString();
+        
         const elemRiesgo = document.getElementById('mNuevoRiesgo');
-        if (nuevoRiesgo > 0) { elemRiesgo.innerText = `⚠️ ${nuevoRiesgo.toLocaleString()} cajas en riesgo`; elemRiesgo.style.color = '#8B0000'; } 
-        else { elemRiesgo.innerText = `✅ ¡0 cajas en riesgo! Stock 100% vendible`; elemRiesgo.style.color = '#16a34a'; }
+        if (nuevoRiesgo > 0) {
+            elemRiesgo.innerText = `⚠️ ${nuevoRiesgo.toLocaleString()} cajas en riesgo`;
+            elemRiesgo.style.color = '#8B0000';
+        } else {
+            elemRiesgo.innerText = `✅ ¡0 cajas en riesgo! Stock 100% vendible`;
+            elemRiesgo.style.color = '#16a34a';
+        }
     }
 
-    function cerrarModal() { document.getElementById('modalSimulador').style.display = 'none'; }
-    
+    function cerrarModal() {
+        document.getElementById('modalSimulador').style.display = 'none';
+    }
+
+    // Exportación a Excel - Restaurada 100% original
     document.getElementById('exportBtn').addEventListener('click', async function() {
-        const workbook = new ExcelJS.Workbook(); const worksheet = workbook.addWorksheet('Riesgo');
-        worksheet.columns = [ { header: 'SKU', key: 'cod', width: 15 }, { header: 'Categoría', key: 'cat', width: 20 }, { header: 'Descripción', key: 'desc', width: 35 }, { header: 'Stock', key: 'totalCant', width: 10 }, { header: 'Riesgo', key: 'cajasRiesgo', width: 10 } ];
-        worksheet.getRow(1).font = { bold: true };
-        datosProcesados.forEach(d => worksheet.addRow(d));
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Riesgo Rotacion FEFO');
+
+        worksheet.columns = [
+            { header: 'Categoría', key: 'cat', width: 18 },
+            { header: 'Código SKU', key: 'cod', width: 16 },
+            { header: 'Descripción del Artículo', key: 'desc', width: 35 },
+            { header: 'Mes Venc.', key: 'mesAno', width: 14 },
+            { header: '1er Vencimiento', key: 'primerFecha', width: 18 },
+            { header: 'Stock Actual', key: 'totalCant', width: 14 },
+            { header: 'Prom. Mensual (6M)', key: 'promMensual', width: 18 },
+            { header: 'Venta Proyectada', key: 'ventaProy', width: 18 },
+            { header: 'Cajas en Riesgo', key: 'cajasRiesgo', width: 16 },
+            { header: 'Alerta Rotación', key: 'alertaRot', width: 28 },
+            { header: 'Alerta FEFO', key: 'alertaFEFO', width: 22 }
+        ];
+
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+        headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '8B0000' } };
+
+        const paletaRotacion = {
+            'ROJO': { bg: 'FEE2E2', font: '8B0000' },
+            'AMARILLO': { bg: 'FEF9C3', font: 'CA8A04' },
+            'VERDE': { bg: 'DCFCE7', font: '16A34A' }
+        };
+
+        const paletaLetraFEFO = {
+            'ROJO': '8B0000',
+            'AMARILLO': 'CA8A04',
+            'ATENCIÓN': 'EA580C',
+            'VERDE': '16A34A'
+        };
+
+        datosProcesados.forEach(d => {
+            const fechaStr = (d.primerFecha instanceof Date) ? d.primerFecha.toLocaleDateString('es-ES') : d.primerFecha;
+            const row = worksheet.addRow({
+                cat: d.cat,
+                cod: d.cod,
+                desc: d.desc,
+                mesAno: d.mesAno,
+                primerFecha: fechaStr,
+                totalCant: d.totalCant,
+                promMensual: parseFloat(d.promMensual.toFixed(1)),
+                ventaProy: d.ventaProyectada,
+                cajasRiesgo: d.cajasRiesgo,
+                alertaRot: d.textoRotacion,
+                alertaFEFO: d.textoFEFO
+            });
+
+            const cellRot = row.getCell(10);
+            const estRot = paletaRotacion[d.codigoRotacion] || paletaRotacion['VERDE'];
+            cellRot.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: estRot.bg } };
+            cellRot.font = { bold: true, color: { argb: estRot.font } };
+
+            const cellFEFO = row.getCell(11);
+            const colorFuenteFEFO = paletaLetraFEFO[d.codigoFEFO] || '16A34A';
+            cellFEFO.font = { bold: true, color: { argb: colorFuenteFEFO } };
+        });
+
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `Reporte.xlsx`; link.click();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Reporte_Riesgo_Rotacion_Vencimientos.xlsx`;
+        link.click();
     });
 </script>
+
 </body>
 </html>
