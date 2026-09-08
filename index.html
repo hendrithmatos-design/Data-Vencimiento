@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wynco | Inteligencia Operativa Logística - Vencimientos</title>
+    <!-- Librerías CDN -->
+    <script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=svAUr6o7Y4GI8eVS8Zzv8Qaeg72OH7A_gj8_A0HQYxVb4Hpl-7F_XF6odo4nFF8y1aIZktI-7PS6n45iVdgH1sbr9igHL-UMPd_Y0GUN1QRuX2lQ42w8I52g5RQA4DYnCmP_ZGzXZZWF6DQXHTbpktG_N2S21FzPdhvSKSbh2NrrTczeeM_fBiS2P8jFiMZWyX7F5CfC8UTzmtHSrHLIEBbxX_Nk-2ZpaEjwp8z0nLwA_Ck3oHb6G1-8zwGjVkRKJA1icb_jeEIa2sT3v7zkpTdCV5hNLq9zyu2yiOU3hl6NtaTPLtsg8NSawqEEwd_iWrVkNaV3htdmpNyZ3rYtMYxkeI6eqBnr6cA6Nuuhj2zKiZfnkMwpPOPvuZHAphOD0QDJy6mMyog3GeylA6IpJkNzMCnRnHtLFPSyre8ZFK1TSp1GpHU7J0zhbWWq6EJ6cnj3vMNFl7Dq0GVGSRiC_p6TajJ5N9SALowSDZwgC6-hNUwByNHTPsakhKVYlmQZUQe9_7Balnd7UEjsDOSMPXGE-nriqywXMkQKqHp7wHDTUTB549J8QSsfgPvb9agvdp_49QOMe-MVurm3QGdgWt28UP_7Qqc1cPztK1ISKtue2mGcaEEc7Anw-6xzh_Ro8HDvjiE9w0s6At54VJIWNRPKPUg5lOc14Y66bpwNZaY_hkbeWCU242k-bfdZFujEk3skwgoLsEBgvwiQ0onGWTVLSfR_QWCQ6S4FN67izAWnkGjRBahgS-fZuNHWQ48KqUA_CQrftyxIREVszyksq1L-AOLSqus2c0AMR8VO5Krt8lXAr2lvX7MXNwz_h0PngSvz4wjjFJQt6GXZNV2zq_KD3_GiEs-wsiEYDWpJOhLt3V9E6vuqyTwvURW-TlU0FJY5slQEv_aIY9Axp_u1Z9qw0fyxqZlZePiTmlyHzRtRzCJeq9Z1xViCB7ljojPVXJIlswgtl2BhaS1ZKFcR7xjq8kO7YiHmXzt_TCr9O542Ig5gWo0H5KIgWZUQgre9MvxNiH7MsJk1mUMS0VrxX4wamNq8S2kE_F4SFclR0IoautMjz-kHnlqMAJyeMie7FvqCwgTcN_pLjEdHvsRI3j-LHmIu-d_3qvSyO2ZnJ3MGRN9Gq0PS1-GyzU4ZVo8jCQfqHktu7G7dc_YxMrPTg6EuBHWOnDZLHUGUIaWyBbFWWB51VY2j1g1jChFSqoAeEKW-hegbqY3y4CQuxmY3xDnnljpHYj8G5mhbmaBhydYPJDcFRYIYcnTDcJtd0aldylVpU7UxLNoLqw1eqZt0hTzVctEgInPih8aZsl3QVZpXxGSCkvEeAi3LS2XGHBCbM6BVtJrEaP_sCpj7N85Zz_0gK49md0ri8DYaIhfO_MtS1jg4I6TP6PqE0vlz4TPjfJqa1ZkQziuE4KiXhE7BfAjr24TnA0goVanllW3eJa386WQ1yVrYZUq1EHhMTqDN72fBpI4E89uIIFhTF9yblwKyHQq-keUE26cj2lv42Y8DC31F3naKgvTu5c41Q9stQg4y6CTdHDHpH8YiRBzmtXz4t23ZHplYZIxmCsV0ZQ_r1xp3vdViVi2EN-KQVN3S2ZZDP8uGwkX-Qr6Y4_I3Ap1dOg1o2ENqsY8WXNB6BEBS1oVoNSVwoGeEFiiOS0kzPnakoruOYLgjoJQ4_4mCHRx2LWAeHSJ5_gjH-gZYYmw6MmewbLke8ca-kWnG0aGS" nonce="14d8c66a26e2e8a20a81202eade21eea" charset="UTF-8"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        :root {
+            --wynco-red: #8B0000;
+            --wynco-red-hover: #6B0000;
+            --wynco-dark: #333333;
+            --wynco-gray: #4D4D4D;
+            --wynco-light-bg: #F8F9FA;
+            --wynco-border: #D1D5DB;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; padding: 15px; color: #1e293b; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
+        .header-title {
+            background-color: var(--wynco-red);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .update-badge { background: rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: normal; }
+
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
+        input[type="file"], input[type="text"], select { padding: 8px 12px; border: 1px solid var(--wynco-border); border-radius: 6px; font-size: 13px; }
+        input[type="text"] { flex-grow: 1; min-width: 180px; }
+        
+        button { background-color: var(--wynco-red); color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
+        button:hover { background-color: var(--wynco-red-hover); }
+        .btn-dash { background-color: var(--wynco-dark); }
+        .btn-dash:hover { background-color: #1a1a1a; }
+        
+        .stats-container { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+        .stat-box { background: var(--wynco-light-bg); border: 1px solid var(--wynco-border); border-top: 4px solid var(--wynco-dark); padding: 10px; border-radius: 6px; text-align: center; flex: 1; min-width: 130px; }
+        .stat-number { font-size: 17px; font-weight: bold; margin-top: 2px; }
+        .stat-subtext { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; }
+        th { background-color: var(--wynco-red); color: white; padding: 10px 8px; text-align: left; position: sticky; top: 0; }
+        td { padding: 8px; border-bottom: 1px solid #e2e8f0; }
+        tr.clickable { cursor: pointer; transition: background-color 0.2s; }
+        tr.clickable:hover { background-color: #f1f5f9; }
+
+        .badge { font-weight: bold; padding: 4px 8px; border-radius: 12px; display: inline-block; font-size: 11px; }
+        .rojo { background-color: #fee2e2; color: #8B0000; border: 1px solid #fecaca; }
+        .amarillo { background-color: #fef9c3; color: #ca8a04; border: 1px solid #fef08a; }
+        .verde { background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        .chart-card { background: #ffffff; border: 1px solid var(--wynco-border); border-top: 3px solid var(--wynco-red); padding: 15px; border-radius: 8px; height: 280px; position: relative; }
+        .chart-container { position: relative; height: 220px; width: 100%; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 550px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; }
+        .close-btn { position: absolute; top: 12px; right: 18px; font-size: 20px; cursor: pointer; color: #64748b; font-weight: bold; }
+        .sim-box { background: var(--wynco-light-bg); border: 1px solid var(--wynco-border); padding: 12px; border-radius: 8px; margin-top: 12px; }
+        .sim-input { width: 75px; padding: 5px; font-weight: bold; text-align: center; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header-title">
+        <span>Wynco | Inteligencia Operativa Logística - Vencimientos FEFO</span>
+        <span id="fechaActualizacion" class="update-badge">Cargando datos...</span>
+    </div>
+    
+    <div class="controls">
+        <input type="file" id="excelFile" accept=".xlsx, .xls" />
+        <input type="text" id="searchInput" placeholder="🔍 Buscar por código, descripción o categoría..." disabled />
+        <select id="filterAlert" disabled>
+            <option value="TODOS">Todos los Estados de Rotación</option>
+            <option value="ROJO">🔴 Riesgo Alto / Crítico (>50% Sobrante)</option>
+            <option value="AMARILLO">🟡 Riesgo Medio (<50% Sobrante)</option>
+            <option value="VERDE">🟢 Rotación Saludable (Stock Vendible)</option>
+        </select>
+        <button id="toggleViewBtn" class="btn-dash" style="display:none;" onclick="alternarVista()">📊 Ver Dashboard CEO</button>
+        <button id="exportBtn" style="display:none;">📥 Exportar a Excel con Colores</button>
+    </div>
+
+    <!-- Indicadores Estadísticos -->
+    <div id="stats" class="stats-container" style="display:none;">
+        <div class="stat-box">
+            <div style="font-weight:600; color: var(--wynco-dark);">Stock Total</div>
+            <div id="statTotalStock" class="stat-number">0</div>
+            <div id="statTotalRegistros" class="stat-subtext">0 SKUs</div>
+        </div>
+        <div class="stat-box" style="border-top-color: var(--wynco-red);">
+            <div style="color: var(--wynco-red); font-weight:600;">🔴 Cajas en Riesgo</div>
+            <div id="statCajasRiesgo" class="stat-number" style="color: var(--wynco-red);">0</div>
+            <div id="statSKURiesgo" class="stat-subtext" style="color: var(--wynco-red);">0 SKUs Críticos</div>
+        </div>
+        <div class="stat-box" style="border-top-color: #16a34a;">
+            <div style="color:#16a34a; font-weight:600;">🟢 Cajas Vendibles</div>
+            <div id="statCajasSeguras" class="stat-number" style="color:#16a34a;">0</div>
+            <div id="statSKUSeguros" class="stat-subtext" style="color:#15803d;">0 SKUs Seguros</div>
+        </div>
+    </div>
+
+    <!-- VISTA 1: TABLA -->
+    <div id="vistaTabla">
+        <div id="resultado"></div>
+    </div>
+
+    <!-- VISTA 2: DASHBOARD CEO -->
+    <div id="vistaDashboard" style="display:none;">
+        <div class="dashboard-grid">
+            <div class="chart-card">
+                <h4 style="margin: 0 0 10px 0; color: var(--wynco-dark); font-size: 14px;">PROPORCIÓN DE INVENTARIO EN RIESGO (%)</h4>
+                <div class="chart-container">
+                    <canvas id="chartPieRiesgo"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h4 style="margin: 0 0 10px 0; color: var(--wynco-dark); font-size: 14px;">DISTRIBUCIÓN DE RIESGO POR CATEGORÍA (%)</h4>
+                <div class="chart-container">
+                    <canvas id="chartBarCategorias"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Simulador -->
+<div id="modalSimulador" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-btn" onclick="cerrarModal()">&times;</span>
+        <h3 id="modalTitulo" style="margin-top: 0; color: var(--wynco-red);"></h3>
+        <p id="modalSubtitulo" style="color: #64748b; font-size: 12px;"></p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+            <div><b>Stock Actual:</b> <span id="mStock"></span> cajas</div>
+            <div><b>Venta Promedio (6M):</b> <span id="mPromedio"></span> cajas/mes</div>
+            <div><b>Meses para Vencer:</b> <span id="mMeses"></span> meses</div>
+            <div><b>Venta Proyectada:</b> <span id="mVentaProy"></span> cajas</div>
+        </div>
+
+        <div class="sim-box">
+            <h4 style="margin-top:0; color: var(--wynco-dark); font-size: 13px;">🚀 Simulador de Impulso de Ventas</h4>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 12px;"><b>Incremento Venta (%):</b></label>
+                <input type="number" id="inputImpulso" class="sim-input" value="0" min="0" max="500" />
+                <button onclick="recalcularSimulacion()">Recalcular</button>
+            </div>
+            <hr style="border:0; border-top: 1px solid #e2e8f0; margin: 10px 0;" />
+            <div style="font-size: 13px;">
+                <div><b>Nueva Venta Promedio:</b> <span id="mNuevaVentaProm" style="font-weight:bold;"></span> cajas/mes</div>
+                <div><b>Nuevas Cajas Proyectadas:</b> <span id="mNuevaVentaTotal" style="font-weight:bold;"></span> cajas</div>
+                <div style="margin-top: 4px; font-size: 14px;"><b>NUEVO RIESGO SOBRANTE:</b> <span id="mNuevoRiesgo" style="font-weight:bold;"></span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    Chart.register(ChartDataLabels);
+
+    let datosProcesados = [];
+    let skuSeleccionado = null;
+    let chartPieInstance = null;
+    let chartBarInstance = null;
+    let enDashboard = false;
+
+    // PARSER ROBUSTO DE FECHAS LATINAS (DD/MM/YYYY o YYYY-MM-DD o Número de Excel)
+    function parseExcelDateRobusto(excelDate) {
+        if (!excelDate) return null;
+        if (excelDate instanceof Date) return isNaN(excelDate.getTime()) ? null : excelDate;
+        
+        if (typeof excelDate === 'number') {
+            return new Date(Math.round((excelDate - 25569) * 86400 * 1000));
+        }
+        
+        if (typeof excelDate === 'string') {
+            const str = excelDate.trim();
+            
+            // Formato DD/MM/YYYY o DD-MM-YYYY (Latino)
+            if (str.includes('/') || str.includes('-')) {
+                const sep = str.includes('/') ? '/' : '-';
+                const partes = str.split(sep);
+                if (partes.length === 3) {
+                    if (partes[0].length === 4) {
+                        // Formato YYYY-MM-DD
+                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                    } else {
+                        // Formato DD/MM/YYYY
+                        const dia = parseInt(partes[0], 10);
+                        const mes = parseInt(partes[1], 10) - 1;
+                        const ano = parseInt(partes[2], 10);
+                        const fecha = new Date(ano, mes, dia);
+                        if (!isNaN(fecha.getTime())) return fecha;
+                    }
+                }
+            }
+            
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) return parsed;
+        }
+        return null;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const esModoCEO = urlParams.get('modo') === 'gerencia' || urlParams.get('modo') === 'ceo';
+
+        if (esModoCEO) {
+            document.getElementById('excelFile').style.display = 'none';
+        }
+
+        const datosGuardados = localStorage.getItem('wynco_datos_vencimiento');
+        const fechaGuardada = localStorage.getItem('wynco_fecha_actualizacion');
+
+        if (datosGuardados) {
+            datosProcesados = JSON.parse(datosGuardados);
+            datosProcesados.forEach(d => { d.primerFecha = new Date(d.primerFecha); });
+
+            document.getElementById('fechaActualizacion').innerText = `📅 Actualizado: ${fechaGuardada}`;
+            document.getElementById('searchInput').disabled = false;
+            document.getElementById('filterAlert').disabled = false;
+            document.getElementById('toggleViewBtn').style.display = 'inline-block';
+            document.getElementById('exportBtn').style.display = 'inline-block';
+            document.getElementById('stats').style.display = 'flex';
+
+            if (esModoCEO) {
+                alternarVista();
+            } else {
+                actualizarVista();
+            }
+        } else {
+            document.getElementById('fechaActualizacion').innerText = "Sin datos guardados";
+        }
+    });
+
+    document.getElementById('excelFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const data = new Uint8Array(event.target.result);
+            // Carga precisa con cellDates en raw true
+            const workbook = XLSX.read(data, { type: 'array', cellDates: true, cellNF: false, cellText: false });
+
+            const sheetVenc = workbook.Sheets['Vencimiento'];
+            const sheetVentas = workbook.Sheets['Venta 6 meses'];
+
+            if (!sheetVenc || !sheetVentas) {
+                alert("Error: El archivo debe contener las pestañas 'Vencimiento' y 'Venta 6 meses'.");
+                return;
+            }
+
+            const fechaHoy = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            document.getElementById('fechaActualizacion').innerText = `📅 Actualizado: ${fechaHoy}`;
+
+            // 1. Ventas Netas (restando notas de crédito negativas)
+            const rowsVentas = XLSX.utils.sheet_to_json(sheetVentas, { raw: true });
+            const ventasPorSKU = {};
+
+            rowsVentas.forEach(r => {
+                const sku = String(r['S.K.U'] || r['SKU'] || '').trim();
+                const cajas = parseFloat(r['Total Cajas Vendidas'] || 0);
+                if (sku) {
+                    ventasPorSKU[sku] = (ventasPorSKU[sku] || 0) + cajas;
+                }
+            });
+
+            // 2. Vencimientos (Lectura completa del 100% de filas)
+            const rowsVenc = XLSX.utils.sheet_to_json(sheetVenc, { raw: true });
+            const grupos = {};
+            const hoy = new Date();
+
+            rowsVenc.forEach(r => {
+                const cat = r['Categoría'] || r['Categoria'] || 'SIN CATEGORIA';
+                const cod = String(r['Número de artículo'] || r['Numero de articulo'] || '').trim();
+                const desc = r['Descripción del artículo'] || r['Descripcion del articulo'] || '';
+                const cant = parseFloat(r['Cantidad'] || 0);
+                const fechaRaw = r['Fecha de vencimiento'];
+
+                const fechaObj = parseExcelDateRobusto(fechaRaw);
+                if (!fechaObj) return;
+
+                const mesAno = `${fechaObj.getFullYear()}-${String(fechaObj.getMonth() + 1).padStart(2, '0')}`;
+                const key = `${cat}|${cod}|${desc}|${mesAno}`;
+
+                if (!grupos[key]) {
+                    grupos[key] = {
+                        cat, cod, desc, mesAno,
+                        primerFecha: fechaObj,
+                        fechasSet: new Set([fechaObj.toLocaleDateString('es-ES')]),
+                        totalCant: cant
+                    };
+                } else {
+                    grupos[key].totalCant += cant;
+                    if (fechaObj < grupos[key].primerFecha) grupos[key].primerFecha = fechaObj;
+                    grupos[key].fechasSet.add(fechaObj.toLocaleDateString('es-ES'));
+                }
+            });
+
+            // 3. Cruzar Datos
+            datosProcesados = Object.values(grupos).map(g => {
+                const diffDias = (g.primerFecha - hoy) / (1000 * 60 * 60 * 24);
+                const mesesParaVencer = Math.max(0.1, diffDias / 30.0);
+                
+                const ventaNeta6M = ventasPorSKU[g.cod] || 0;
+                const promMensual = Math.max(0, ventaNeta6M / 6.0);
+                
+                const ventaProyectada = Math.round(promMensual * mesesParaVencer);
+                const cajasEnRiesgo = Math.max(0, Math.round(g.totalCant - ventaProyectada));
+                
+                let claseRotacion = 'verde', textoRotacion = '🟢 Stock Vendible', codigoRotacion = 'VERDE';
+                const pctRiesgo = (g.totalCant > 0) ? (cajasEnRiesgo / g.totalCant) * 100 : 0;
+
+                if (promMensual === 0 && g.totalCant > 0) {
+                    claseRotacion = 'rojo'; textoRotacion = '🔴 Crítico (Sin Venta 6M)'; codigoRotacion = 'ROJO';
+                } else if (pctRiesgo >= 50) {
+                    claseRotacion = 'rojo'; textoRotacion = `🔴 Alto Riesgo (${Math.round(pctRiesgo)}% Sobrante)`; codigoRotacion = 'ROJO';
+                } else if (cajasEnRiesgo > 0) {
+                    claseRotacion = 'amarillo'; textoRotacion = `🟡 Medio Riesgo (${Math.round(pctRiesgo)}% Sobrante)`; codigoRotacion = 'AMARILLO';
+                }
+
+                let textoFEFO = '🟢 VERDE (> 7 Meses)', codigoFEFO = 'VERDE';
+                if (mesesParaVencer <= 3) { textoFEFO = '🔴 ROJO (1-3 Meses)'; codigoFEFO = 'ROJO'; }
+                else if (mesesParaVencer <= 5) { textoFEFO = '🟡 AMARILLO (4-5 Meses)'; codigoFEFO = 'AMARILLO'; }
+                else if (mesesParaVencer <= 7) { textoFEFO = '🟠 ATENCIÓN (6 Meses)'; codigoFEFO = 'ATENCIÓN'; }
+
+                return {
+                    ...g,
+                    mesesParaVencer,
+                    ventaNeta6M,
+                    promMensual,
+                    ventaProyectada,
+                    cajasEnRiesgo,
+                    pctRiesgo,
+                    claseRotacion,
+                    textoRotacion,
+                    codigoRotacion,
+                    textoFEFO,
+                    codigoFEFO
+                };
+            }).sort((a, b) => b.cajasEnRiesgo - a.cajasEnRiesgo);
+
+            localStorage.setItem('wynco_datos_vencimiento', JSON.stringify(datosProcesados));
+            localStorage.setItem('wynco_fecha_actualizacion', fechaHoy);
+
+            document.getElementById('searchInput').disabled = false;
+            document.getElementById('filterAlert').disabled = false;
+            document.getElementById('toggleViewBtn').style.display = 'inline-block';
+            document.getElementById('exportBtn').style.display = 'inline-block';
+            document.getElementById('stats').style.display = 'flex';
+
+            actualizarVista();
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+
+    function actualizarVista() {
+        const busqueda = document.getElementById('searchInput').value.toLowerCase();
+        const filtroEstado = document.getElementById('filterAlert').value;
+
+        const filtrados = datosProcesados.filter(item => {
+            const coincideTexto = item.cod.toLowerCase().includes(busqueda) || 
+                                 item.desc.toLowerCase().includes(busqueda) || 
+                                 item.cat.toLowerCase().includes(busqueda);
+            const coincideEstado = (filtroEstado === 'TODOS') || (item.codigoRotacion === filtroEstado);
+            return coincideTexto && coincideEstado;
+        });
+
+        const totalStock = filtrados.reduce((a, b) => a + b.totalCant, 0);
+        const totalRiesgo = filtrados.reduce((a, b) => a + b.cajasEnRiesgo, 0);
+        const totalSeguro = Math.max(0, totalStock - totalRiesgo);
+
+        document.getElementById('statTotalStock').innerText = `${totalStock.toLocaleString()} cajas`;
+        document.getElementById('statTotalRegistros').innerText = `${filtrados.length} SKUs`;
+
+        document.getElementById('statCajasRiesgo').innerText = `${totalRiesgo.toLocaleString()} cajas`;
+        document.getElementById('statSKURiesgo').innerText = `${filtrados.filter(d => d.codigoRotacion === 'ROJO').length} SKUs Críticos`;
+
+        document.getElementById('statCajasSeguras').innerText = `${totalSeguro.toLocaleString()} cajas`;
+        document.getElementById('statSKUSeguros').innerText = `${filtrados.filter(d => d.codigoRotacion === 'VERDE').length} SKUs Seguros`;
+
+        let html = `<table><tr>
+            <th>Categoría</th><th>SKU</th><th>Descripción</th><th>Mes Venc.</th>
+            <th>1er Venc. (FEFO)</th><th>Stock</th><th>Prom. Venta (6M)</th><th>Cajas en Riesgo</th><th>Alerta Rotación</th>
+        </tr>`;
+
+        filtrados.forEach(g => {
+            const fechaStr = (g.primerFecha instanceof Date) ? g.primerFecha.toLocaleDateString('es-ES') : g.primerFecha;
+            html += `<tr class="clickable" onclick="abrirSimulador('${g.cod}', '${g.mesAno}')">
+                <td>${g.cat}</td><td><b>${g.cod}</b></td><td>${g.desc}</td><td>${g.mesAno}</td>
+                <td>${fechaStr}</td>
+                <td><b>${g.totalCant.toLocaleString()}</b></td>
+                <td>${g.promMensual.toFixed(1)} /mes</td>
+                <td><b style="color:${g.cajasEnRiesgo > 0 ? '#8B0000' : '#16a34a'}">${g.cajasEnRiesgo.toLocaleString()}</b></td>
+                <td><span class="badge ${g.claseRotacion}">${g.textoRotacion}</span></td>
+            </tr>`;
+        });
+
+        html += '</table>';
+        document.getElementById('resultado').innerHTML = html;
+
+        if (enDashboard) {
+            renderizarGraficos(filtrados, totalRiesgo, totalSeguro);
+        }
+    }
+
+    function alternarVista() {
+        enDashboard = !enDashboard;
+        const btn = document.getElementById('toggleViewBtn');
+        const vTabla = document.getElementById('vistaTabla');
+        const vDash = document.getElementById('vistaDashboard');
+
+        if (enDashboard) {
+            btn.innerText = "📋 Ver Vista de Tabla";
+            vTabla.style.display = 'none';
+            vDash.style.display = 'block';
+            actualizarVista();
+        } else {
+            btn.innerText = "📊 Ver Dashboard CEO";
+            vDash.style.display = 'none';
+            vTabla.style.display = 'block';
+        }
+    }
+
+    function renderizarGraficos(filtrados, totalRiesgo, totalSeguro) {
+        const totalGráfico = totalRiesgo + totalSeguro;
+
+        const ctxPie = document.getElementById('chartPieRiesgo').getContext('2d');
+        if (chartPieInstance) chartPieInstance.destroy();
+
+        chartPieInstance = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: ['Cajas en Riesgo', 'Cajas Vendibles'],
+                datasets: [{
+                    data: [totalRiesgo, totalSeguro],
+                    backgroundColor: ['#8B0000', '#4D4D4D']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                    datalabels: {
+                        color: '#ffffff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value) => {
+                            if (totalGráfico === 0) return '0%';
+                            const pct = ((value / totalGráfico) * 100).toFixed(1);
+                            return `${pct}%`;
+                        }
+                    }
+                }
+            }
+        });
+
+        const catMap = {};
+        filtrados.forEach(d => {
+            if (d.cajasEnRiesgo > 0) {
+                catMap[d.cat] = (catMap[d.cat] || 0) + d.cajasEnRiesgo;
+            }
+        });
+
+        const labelsCat = Object.keys(catMap);
+        const dataCat = Object.values(catMap);
+
+        const ctxBar = document.getElementById('chartBarCategorias').getContext('2d');
+        if (chartBarInstance) chartBarInstance.destroy();
+
+        chartBarInstance = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: labelsCat,
+                datasets: [{
+                    label: 'Cajas en Riesgo',
+                    data: dataCat,
+                    backgroundColor: '#8B0000'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 2,
+                        color: '#8B0000',
+                        font: { weight: 'bold', size: 11 },
+                        formatter: (value) => {
+                            if (totalRiesgo === 0) return '0%';
+                            const pct = ((value / totalRiesgo) * 100).toFixed(1);
+                            return `${pct}%`;
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 10 } } },
+                    y: { grace: '15%', ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', actualizarVista);
+    document.getElementById('filterAlert').addEventListener('change', actualizarVista);
+
+    function abrirSimulador(cod, mesAno) {
+        const item = datosProcesados.find(d => d.cod === cod && d.mesAno === mesAno);
+        if (!item) return;
+
+        skuSeleccionado = item;
+        const fechaStr = (item.primerFecha instanceof Date) ? item.primerFecha.toLocaleDateString('es-ES') : item.primerFecha;
+
+        document.getElementById('modalTitulo').innerText = `${item.cod} - ${item.desc}`;
+        document.getElementById('modalSubtitulo').innerText = `Categoría: ${item.cat} | Vencimiento: ${fechaStr}`;
+        
+        document.getElementById('mStock').innerText = item.totalCant.toLocaleString();
+        document.getElementById('mPromedio').innerText = item.promMensual.toFixed(1);
+        document.getElementById('mMeses').innerText = item.mesesParaVencer.toFixed(1);
+        document.getElementById('mVentaProy').innerText = item.ventaProyectada.toLocaleString();
+
+        document.getElementById('inputImpulso').value = 0;
+        recalcularSimulacion();
+
+        document.getElementById('modalSimulador').style.display = 'flex';
+    }
+
+    function recalcularSimulacion() {
+        if (!skuSeleccionado) return;
+        const pctImpulso = parseFloat(document.getElementById('inputImpulso').value || 0);
+        
+        const nuevaVentaProm = skuSeleccionado.promMensual * (1 + (pctImpulso / 100.0));
+        const nuevaVentaTotal = Math.round(nuevaVentaProm * skuSeleccionado.mesesParaVencer);
+        const nuevoRiesgo = Math.max(0, Math.round(skuSeleccionado.totalCant - nuevaVentaTotal));
+
+        document.getElementById('mNuevaVentaProm').innerText = nuevaVentaProm.toFixed(1);
+        document.getElementById('mNuevaVentaTotal').innerText = nuevaVentaTotal.toLocaleString();
+        
+        const elemRiesgo = document.getElementById('mNuevoRiesgo');
+        if (nuevoRiesgo > 0) {
+            elemRiesgo.innerText = `⚠️ ${nuevoRiesgo.toLocaleString()} cajas en riesgo`;
+            elemRiesgo.style.color = '#8B0000';
+        } else {
+            elemRiesgo.innerText = `✅ ¡0 cajas en riesgo! Stock 100% vendible`;
+            elemRiesgo.style.color = '#16a34a';
+        }
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalSimulador').style.display = 'none';
+    }
+
+    // Exportación a Excel
+    document.getElementById('exportBtn').addEventListener('click', async function() {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Riesgo Rotacion FEFO');
+
+        worksheet.columns = [
+            { header: 'Categoría', key: 'cat', width: 18 },
+            { header: 'Código SKU', key: 'cod', width: 16 },
+            { header: 'Descripción del Artículo', key: 'desc', width: 35 },
+            { header: 'Mes Venc.', key: 'mesAno', width: 14 },
+            { header: '1er Vencimiento', key: 'primerFecha', width: 18 },
+            { header: 'Stock Actual', key: 'totalCant', width: 14 },
+            { header: 'Prom. Mensual (6M)', key: 'promMensual', width: 18 },
+            { header: 'Venta Proyectada', key: 'ventaProy', width: 18 },
+            { header: 'Cajas en Riesgo', key: 'cajasRiesgo', width: 16 },
+            { header: 'Alerta Rotación', key: 'alertaRot', width: 28 },
+            { header: 'Alerta FEFO', key: 'alertaFEFO', width: 22 }
+        ];
+
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+        headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '8B0000' } };
+
+        const paletaRotacion = {
+            'ROJO': { bg: 'FEE2E2', font: '8B0000' },
+            'AMARILLO': { bg: 'FEF9C3', font: 'CA8A04' },
+            'VERDE': { bg: 'DCFCE7', font: '16A34A' }
+        };
+
+        const paletaLetraFEFO = {
+            'ROJO': '8B0000',
+            'AMARILLO': 'CA8A04',
+            'ATENCIÓN': 'EA580C',
+            'VERDE': '16A34A'
+        };
+
+        datosProcesados.forEach(d => {
+            const fechaStr = (d.primerFecha instanceof Date) ? d.primerFecha.toLocaleDateString('es-ES') : d.primerFecha;
+            const row = worksheet.addRow({
+                cat: d.cat,
+                cod: d.cod,
+                desc: d.desc,
+                mesAno: d.mesAno,
+                primerFecha: fechaStr,
+                totalCant: d.totalCant,
+                promMensual: parseFloat(d.promMensual.toFixed(1)),
+                ventaProy: d.ventaProyectada,
+                cajasRiesgo: d.cajasRiesgo,
+                alertaRot: d.textoRotacion,
+                alertaFEFO: d.textoFEFO
+            });
+
+            const cellRot = row.getCell(10);
+            const estRot = paletaRotacion[d.codigoRotacion] || paletaRotacion['VERDE'];
+            cellRot.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: estRot.bg } };
+            cellRot.font = { bold: true, color: { argb: estRot.font } };
+
+            const cellFEFO = row.getCell(11);
+            const colorFuenteFEFO = paletaLetraFEFO[d.codigoFEFO] || '16A34A';
+            cellFEFO.font = { bold: true, color: { argb: colorFuenteFEFO } };
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Reporte_Riesgo_Rotacion_Vencimientos.xlsx`;
+        link.click();
+    });
+</script>
+
+</body>
+</html>
