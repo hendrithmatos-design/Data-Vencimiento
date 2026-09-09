@@ -95,7 +95,7 @@
         .modal-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 550px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; }
         .close-btn { position: absolute; top: 12px; right: 18px; font-size: 20px; cursor: pointer; color: #64748b; font-weight: bold; }
         .sim-box { background: var(--wynco-light-bg); border: 1px solid var(--wynco-border); padding: 12px; border-radius: 8px; margin-top: 12px; }
-        .sim-input { width: 75px; padding: 5px; font-weight: bold; text-align: center; font-size: 14px; }
+        .sim-input { width: 90px; padding: 5px; font-weight: bold; text-align: center; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -168,32 +168,40 @@
     </div>
 </div>
 
-<!-- Modal Simulador -->
+<!-- Modal Simulador (ACTUALIZADO A DUAL) -->
 <div id="modalSimulador" class="modal-overlay">
     <div class="modal-content">
         <span class="close-btn" onclick="cerrarModal()">&times;</span>
         <h3 id="modalTitulo" style="margin-top: 0; color: var(--wynco-red);"></h3>
         <p id="modalSubtitulo" style="color: #64748b; font-size: 12px;"></p>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
             <div><b>Stock Actual:</b> <span id="mStock"></span> cajas</div>
             <div><b>Venta Promedio (6M):</b> <span id="mPromedio"></span> cajas/mes</div>
-            <div><b>Meses para Vencer:</b> <span id="mMeses"></span> meses</div>
-            <div><b>Venta Proyectada:</b> <span id="mVentaProy"></span> cajas</div>
+            <div><b>Límite Comercial:</b> <span id="mMeses"></span></div>
+            <div><b>Venta Proyectada (Útil):</b> <span id="mVentaProy"></span> cajas</div>
         </div>
 
         <div class="sim-box">
-            <h4 style="margin-top:0; color: var(--wynco-dark); font-size: 13px;">🚀 Simulador de Impulso de Ventas</h4>
+            <h4 style="margin-top:0; color: var(--wynco-dark); font-size: 13px;">🚀 Simulador de Estrategia de Ventas</h4>
+            
+            <div style="margin-bottom: 8px;">
+                <label style="font-size: 12px; margin-right: 5px;"><b>Modo de Simulación:</b></label>
+                <select id="tipoSimulacion" onchange="recalcularSimulacion()" style="padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid var(--wynco-border);">
+                    <option value="porcentaje">Aumento en Porcentaje (%)</option>
+                    <option value="cajas">Venta Fija Directa (Cajas/mes)</option>
+                </select>
+            </div>
+
             <div style="display: flex; align-items: center; gap: 8px;">
-                <label style="font-size: 12px;"><b>Incremento Venta (%):</b></label>
-                <!-- EVENTO ONINPUT AGREGADO PARA CÁLCULO EN VIVO -->
-                <input type="number" id="inputImpulso" class="sim-input" value="0" min="0" max="500" oninput="recalcularSimulacion()" />
+                <label id="lblInputSimulador" style="font-size: 12px; width: 135px;"><b>Incremento Venta (%):</b></label>
+                <input type="number" id="inputImpulso" class="sim-input" value="0" min="0" oninput="recalcularSimulacion()" />
                 <button onclick="recalcularSimulacion()">Recalcular</button>
             </div>
             <hr style="border:0; border-top: 1px solid #e2e8f0; margin: 10px 0;" />
             <div style="font-size: 13px;">
                 <div><b>Nueva Venta Promedio:</b> <span id="mNuevaVentaProm" style="font-weight:bold;"></span> cajas/mes</div>
-                <div><b>Nuevas Cajas Proyectadas:</b> <span id="mNuevaVentaTotal" style="font-weight:bold;"></span> cajas</div>
+                <div><b>Cajas Vendidas en Tiempo Útil:</b> <span id="mNuevaVentaTotal" style="font-weight:bold;"></span> cajas</div>
                 <div style="margin-top: 4px; font-size: 14px;"><b>NUEVO RIESGO SOBRANTE:</b> <span id="mNuevoRiesgo" style="font-weight:bold;"></span></div>
             </div>
         </div>
@@ -209,6 +217,7 @@
     let chartBarInstance = null;
     let enDashboard = false;
 
+    // PARSER ROBUSTO DE FECHAS LATINAS
     function parseExcelDateRobusto(excelDate) {
         if (!excelDate) return null;
         if (excelDate instanceof Date) return isNaN(excelDate.getTime()) ? null : excelDate;
@@ -253,7 +262,7 @@
 
     async function cargarExcelAutomatico() {
         try {
-            // NUEVO MÉTODO PARA FECHA: API DIRECTA DE GITHUB
+            // API DIRECTA DE GITHUB
             let textoFecha = "";
             try {
                 const repoResponse = await fetch('https://api.github.com/repos/hendrithmatos-design/Data-Vencimiento/commits?per_page=1');
@@ -269,12 +278,11 @@
             }
 
             if (!textoFecha) {
-                // Si falla el internet o GitHub se cae, usa la hora de hoy como respaldo
                 textoFecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             }
             document.getElementById('fechaActualizacion').innerText = `📅 Última carga: ${textoFecha}`;
 
-            // CARGA DE DATOS (Con el Anti-Caché)
+            // CARGA DE DATOS (Anti-Caché)
             const response = await fetch('datos.xlsx', { cache: 'no-store' });
             
             if (!response.ok) throw new Error("No se encontró el archivo");
@@ -319,6 +327,7 @@
                 if (!fechaObj) return;
 
                 const mesAno = `${fechaObj.getFullYear()}-${String(fechaObj.getMonth() + 1).padStart(2, '0')}`;
+                
                 const key = `${cat}|${cod}|${desc}|${mesAno}`;
 
                 if (!grupos[key]) {
@@ -335,20 +344,29 @@
                 }
             });
 
+            // PROCESAMIENTO PRINCIPAL Y REGLA DE LOS 3 MESES
             datosProcesados = Object.values(grupos).map(g => {
                 const diffDias = (g.primerFecha - hoy) / (1000 * 60 * 60 * 24);
-                const mesesParaVencer = Math.max(0.1, diffDias / 30.0);
+                
+                // Meses totales cronológicos
+                const mesesParaVencer = Math.max(0, diffDias / 30.0);
+                // REGLA: Límite comercial 3 meses antes
+                const mesesUtiles = Math.max(0, mesesParaVencer - 3);
                 
                 const ventaNeta6M = ventasPorSKU[g.cod] || 0;
                 const promMensual = Math.max(0, ventaNeta6M / 6.0);
                 
-                const ventaProyectada = Math.round(promMensual * mesesParaVencer);
+                // Se proyecta la venta SÓLO en los meses útiles
+                const ventaProyectada = Math.round(promMensual * mesesUtiles);
                 const cajasEnRiesgo = Math.max(0, Math.round(g.totalCant - ventaProyectada));
                 
                 let claseRotacion = 'verde', textoRotacion = '🟢 Stock Vendible', codigoRotacion = 'VERDE';
                 const pctRiesgo = (g.totalCant > 0) ? (cajasEnRiesgo / g.totalCant) * 100 : 0;
 
-                if (promMensual === 0 && g.totalCant > 0) {
+                // Nueva lógica de colores aplicando los 3 meses
+                if (mesesUtiles === 0 && g.totalCant > 0) {
+                    claseRotacion = 'rojo'; textoRotacion = '🔴 Bloqueado (Vence < 3M)'; codigoRotacion = 'ROJO';
+                } else if (promMensual === 0 && g.totalCant > 0) {
                     claseRotacion = 'rojo'; textoRotacion = '🔴 Crítico (Sin Venta 6M)'; codigoRotacion = 'ROJO';
                 } else if (pctRiesgo >= 50) {
                     claseRotacion = 'rojo'; textoRotacion = `🔴 Alto Riesgo (${Math.round(pctRiesgo)}% Sobrante)`; codigoRotacion = 'ROJO';
@@ -356,14 +374,16 @@
                     claseRotacion = 'amarillo'; textoRotacion = `🟡 Medio Riesgo (${Math.round(pctRiesgo)}% Sobrante)`; codigoRotacion = 'AMARILLO';
                 }
 
+                // Ajuste visual del FEFO para advertir del bloqueo
                 let textoFEFO = '🟢 VERDE (> 7 Meses)', codigoFEFO = 'VERDE';
-                if (mesesParaVencer <= 3) { textoFEFO = '🔴 ROJO (1-3 Meses)'; codigoFEFO = 'ROJO'; }
-                else if (mesesParaVencer <= 5) { textoFEFO = '🟡 AMARILLO (4-5 Meses)'; codigoFEFO = 'AMARILLO'; }
+                if (mesesParaVencer <= 3) { textoFEFO = '🔴 BLOQUEADO (<= 3 Meses)'; codigoFEFO = 'ROJO'; }
+                else if (mesesParaVencer <= 5) { textoFEFO = '🟡 ALERTA (4-5 Meses)'; codigoFEFO = 'AMARILLO'; }
                 else if (mesesParaVencer <= 7) { textoFEFO = '🟠 ATENCIÓN (6 Meses)'; codigoFEFO = 'ATENCIÓN'; }
 
                 return {
                     ...g,
                     mesesParaVencer,
+                    mesesUtiles,
                     ventaNeta6M,
                     promMensual,
                     ventaProyectada,
@@ -393,7 +413,6 @@
                 actualizarVista();
             }
 
-            // Ocultar la cortina de carga suavemente
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) {
                 overlay.style.opacity = '0';
@@ -404,7 +423,6 @@
             console.error("Error al cargar automático:", error);
             document.getElementById('fechaActualizacion').innerText = "⚠️ Error: No se encontró el archivo datos.xlsx en la nube";
             
-            // Ocultar la cortina en caso de error para no dejar la página bloqueada
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) overlay.style.display = 'none';
         }
@@ -422,7 +440,7 @@
             return coincideTexto && coincideEstado;
         });
 
-        // REGLA DE ORDENAMIENTO
+        // REGLA DE ORDENAMIENTO (Intacta)
         if (busqueda !== '') {
             filtrados.sort((a, b) => {
                 if (a.cod !== b.cod) return a.cod.localeCompare(b.cod);
@@ -597,9 +615,13 @@
         
         document.getElementById('mStock').innerText = item.totalCant.toLocaleString();
         document.getElementById('mPromedio').innerText = item.promMensual.toFixed(1);
-        document.getElementById('mMeses').innerText = item.mesesParaVencer.toFixed(1);
+        
+        // Mostrar visualmente los meses útiles en el modal
+        document.getElementById('mMeses').innerText = `${item.mesesParaVencer.toFixed(1)} meses (Útiles: ${item.mesesUtiles.toFixed(1)})`;
         document.getElementById('mVentaProy').innerText = item.ventaProyectada.toLocaleString();
 
+        // Reiniciar los valores
+        document.getElementById('tipoSimulacion').value = 'porcentaje';
         document.getElementById('inputImpulso').value = 0;
         recalcularSimulacion();
 
@@ -608,17 +630,32 @@
 
     function recalcularSimulacion() {
         if (!skuSeleccionado) return;
-        const pctImpulso = parseFloat(document.getElementById('inputImpulso').value || 0);
         
-        const nuevaVentaProm = skuSeleccionado.promMensual * (1 + (pctImpulso / 100.0));
-        const nuevaVentaTotal = Math.round(nuevaVentaProm * skuSeleccionado.mesesParaVencer);
+        const tipo = document.getElementById('tipoSimulacion').value;
+        const valor = parseFloat(document.getElementById('inputImpulso').value || 0);
+        
+        let nuevaVentaProm = 0;
+
+        if (tipo === 'porcentaje') {
+            document.getElementById('lblInputSimulador').innerHTML = '<b>Incremento Venta (%):</b>';
+            nuevaVentaProm = skuSeleccionado.promMensual * (1 + (valor / 100.0));
+        } else {
+            document.getElementById('lblInputSimulador').innerHTML = '<b>Nueva Venta (Cajas/mes):</b>';
+            nuevaVentaProm = valor;
+        }
+
+        // El recálculo ahora se multiplica SOLO por los meses útiles permitidos (restando 3 meses)
+        const nuevaVentaTotal = Math.round(nuevaVentaProm * skuSeleccionado.mesesUtiles);
         const nuevoRiesgo = Math.max(0, Math.round(skuSeleccionado.totalCant - nuevaVentaTotal));
 
         document.getElementById('mNuevaVentaProm').innerText = nuevaVentaProm.toFixed(1);
         document.getElementById('mNuevaVentaTotal').innerText = nuevaVentaTotal.toLocaleString();
         
         const elemRiesgo = document.getElementById('mNuevoRiesgo');
-        if (nuevoRiesgo > 0) {
+        if (skuSeleccionado.mesesUtiles === 0) {
+            elemRiesgo.innerText = `⛔ Imposible salvar (Faltan menos de 3 meses para vencer)`;
+            elemRiesgo.style.color = '#8B0000';
+        } else if (nuevoRiesgo > 0) {
             elemRiesgo.innerText = `⚠️ ${nuevoRiesgo.toLocaleString()} cajas en riesgo`;
             elemRiesgo.style.color = '#8B0000';
         } else {
