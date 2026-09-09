@@ -332,7 +332,8 @@
                     textoFEFO,
                     codigoFEFO
                 };
-            }).sort((a, b) => b.cajasEnRiesgo - a.cajasEnRiesgo);
+            });
+            // El .sort() que estaba aquí se eliminó para controlarlo dinámicamente en actualizarVista()
 
             document.getElementById('searchInput').disabled = false;
             document.getElementById('filterAlert').disabled = false;
@@ -357,16 +358,33 @@
     }
 
     function actualizarVista() {
-        const busqueda = document.getElementById('searchInput').value.toLowerCase();
+        const busqueda = document.getElementById('searchInput').value.toLowerCase().trim();
         const filtroEstado = document.getElementById('filterAlert').value;
 
-        const filtrados = datosProcesados.filter(item => {
+        let filtrados = datosProcesados.filter(item => {
             const coincideTexto = item.cod.toLowerCase().includes(busqueda) || 
                                  item.desc.toLowerCase().includes(busqueda) || 
                                  item.cat.toLowerCase().includes(busqueda);
             const coincideEstado = (filtroEstado === 'TODOS') || (item.codigoRotacion === filtroEstado);
             return coincideTexto && coincideEstado;
         });
+
+        // NUEVA LÓGICA DE ORDENAMIENTO (OPCIÓN A)
+        if (busqueda !== '') {
+            // 1. Si hay una búsqueda activa (ej. filtrando un SKU), ordenar por FEFO (Fecha más próxima primero)
+            filtrados.sort((a, b) => a.primerFecha.getTime() - b.primerFecha.getTime());
+        } else {
+            // 2. Vista por defecto: Prioridad por Nivel de Riesgo (Color) y luego por cantidad de cajas
+            const pesoColor = { 'ROJO': 1, 'AMARILLO': 2, 'VERDE': 3 };
+            
+            filtrados.sort((a, b) => {
+                if (pesoColor[a.codigoRotacion] !== pesoColor[b.codigoRotacion]) {
+                    return pesoColor[a.codigoRotacion] - pesoColor[b.codigoRotacion];
+                }
+                // Si tienen el mismo color, el de mayor riesgo en cajas va primero
+                return b.cajasEnRiesgo - a.cajasEnRiesgo;
+            });
+        }
 
         const totalStock = filtrados.reduce((a, b) => a + b.totalCant, 0);
         const totalRiesgo = filtrados.reduce((a, b) => a + b.cajasEnRiesgo, 0);
@@ -497,10 +515,6 @@
                             return `${pct}%`;
                         }
                     }
-                },
-                scales: {
-                    x: { ticks: { font: { size: 10 } } },
-                    y: { grace: '15%', ticks: { font: { size: 10 } } }
                 }
             }
         });
