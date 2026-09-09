@@ -221,12 +221,10 @@
 
     async function cargarExcelAutomatico() {
         try {
-            // AQUI ESTA LA INSTRUCCION ANTI-CACHE
             const response = await fetch('datos.xlsx', { cache: 'no-store' });
             
             if (!response.ok) throw new Error("No se encontró el archivo");
             
-            // Lógica para obtener la fecha de actualización real o la actual
             let textoFecha = "";
             const lastModified = response.headers.get('Last-Modified');
             if (lastModified) {
@@ -276,6 +274,7 @@
                 if (!fechaObj) return;
 
                 const mesAno = `${fechaObj.getFullYear()}-${String(fechaObj.getMonth() + 1).padStart(2, '0')}`;
+                // Usamos el mesAno como clave para agrupar por lote de vencimiento
                 const key = `${cat}|${cod}|${desc}|${mesAno}`;
 
                 if (!grupos[key]) {
@@ -333,7 +332,6 @@
                     codigoFEFO
                 };
             });
-            // El .sort() que estaba aquí se eliminó para controlarlo dinámicamente en actualizarVista()
 
             document.getElementById('searchInput').disabled = false;
             document.getElementById('filterAlert').disabled = false;
@@ -369,10 +367,10 @@
             return coincideTexto && coincideEstado;
         });
 
-        // NUEVA LÓGICA DE ORDENAMIENTO (OPCIÓN A)
+        // NUEVA LÓGICA DE ORDENAMIENTO (CORREGIDA PARA FECHAS)
         if (busqueda !== '') {
-            // 1. Si hay una búsqueda activa (ej. filtrando un SKU), ordenar por FEFO (Fecha más próxima primero)
-            filtrados.sort((a, b) => a.primerFecha.getTime() - b.primerFecha.getTime());
+            // 1. Si hay búsqueda, forzamos ordenar por la cadena "YYYY-MM" (mesAno) para un FEFO cronológico perfecto
+            filtrados.sort((a, b) => a.mesAno.localeCompare(b.mesAno));
         } else {
             // 2. Vista por defecto: Prioridad por Nivel de Riesgo (Color) y luego por cantidad de cajas
             const pesoColor = { 'ROJO': 1, 'AMARILLO': 2, 'VERDE': 3 };
@@ -381,7 +379,6 @@
                 if (pesoColor[a.codigoRotacion] !== pesoColor[b.codigoRotacion]) {
                     return pesoColor[a.codigoRotacion] - pesoColor[b.codigoRotacion];
                 }
-                // Si tienen el mismo color, el de mayor riesgo en cajas va primero
                 return b.cajasEnRiesgo - a.cajasEnRiesgo;
             });
         }
@@ -515,6 +512,10 @@
                             return `${pct}%`;
                         }
                     }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 10 } } },
+                    y: { grace: '15%', ticks: { font: { size: 10 } } }
                 }
             }
         });
