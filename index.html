@@ -367,19 +367,34 @@
             return coincideTexto && coincideEstado;
         });
 
-        // NUEVA LÓGICA DE ORDENAMIENTO (CORREGIDA PARA FECHAS)
+        // REGLA DE ORDENAMIENTO (CORREGIDA PARA DESEMPATES)
         if (busqueda !== '') {
-            // 1. Si hay búsqueda, forzamos ordenar por la cadena "YYYY-MM" (mesAno) para un FEFO cronológico perfecto
-            filtrados.sort((a, b) => a.mesAno.localeCompare(b.mesAno));
+            // 1. Si hay texto en el buscador: Agrupar por SKU primero, luego ordenar por FEFO
+            filtrados.sort((a, b) => {
+                if (a.cod !== b.cod) {
+                    return a.cod.localeCompare(b.cod);
+                }
+                return a.mesAno.localeCompare(b.mesAno);
+            });
         } else {
-            // 2. Vista por defecto: Prioridad por Nivel de Riesgo (Color) y luego por cantidad de cajas
+            // 2. Vista por defecto o Filtros desplegables:
             const pesoColor = { 'ROJO': 1, 'AMARILLO': 2, 'VERDE': 3 };
             
             filtrados.sort((a, b) => {
+                // Prioridad 1: Color (Rojo > Amarillo > Verde)
                 if (pesoColor[a.codigoRotacion] !== pesoColor[b.codigoRotacion]) {
                     return pesoColor[a.codigoRotacion] - pesoColor[b.codigoRotacion];
                 }
-                return b.cajasEnRiesgo - a.cajasEnRiesgo;
+                // Prioridad 2: Mayor cantidad de cajas en riesgo
+                if (b.cajasEnRiesgo !== a.cajasEnRiesgo) {
+                    return b.cajasEnRiesgo - a.cajasEnRiesgo;
+                }
+                // Prioridad 3 (Desempate): Agrupar por SKU para que no se separen
+                if (a.cod !== b.cod) {
+                    return a.cod.localeCompare(b.cod);
+                }
+                // Prioridad 4 (Desempate Final): Orden FEFO cronológico
+                return a.mesAno.localeCompare(b.mesAno);
             });
         }
 
